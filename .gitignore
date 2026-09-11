@@ -1,0 +1,25 @@
+# environment
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# vscode
+.vscode/
+*.code-workspace
+
+# jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# data — don't commit raw or processed data
+data/raw/
+data/processed/
+data/models/
+
+# os
+.DS_Store
+Thumbs.db

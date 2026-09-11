@@ -1,0 +1,13 @@
+[project]
+name = "mod3-project2-nlp-group2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "datetime>=6.0",
+    "google-api-python-client>=2.200.0",
+    "kagglehub>=1.0.2",
+    "polars>=1.44.2",
+    "python-dotenv>=1.2.3",
+]
