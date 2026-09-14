@@ -14,19 +14,31 @@ youtube = build("youtube", "v3", developerKey=API_KEY)
 
 SEARCH_QUERIES: list[str] = [
     "politics",
-    "AI",
+    "male loneliness epidemic",
     "religion",
     "feminism",
-    "gaming",
-    "reaction",
-    "prank",
-    "commentary",
+    "trump",
+    "tradwife",
+    "trans",
+    "race",
+    "immigration",
+    "abortion",
+    "islam",
+    "andrew tate",
+    "black lives matter",
+    "lgbtq",
+    "climate change",
+    "vaccines",
+    "israel palestine",
+    "incel",
+    "white privilege",
+    "cancel culture",
 ]
 
-VIDEOS_PER_QUERY: int = 30
-COMMENTS_PER_VIDEO: int = 10
+VIDEOS_PER_QUERY: int = 40
+COMMENTS_PER_VIDEO: int = 30
 OUTPUT_PATH: str = (
-    f"data/raw/scrapped/youtube_comments_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    f"data/raw/scraped/youtube_comments_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 )
 
 
