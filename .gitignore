@@ -20,6 +20,9 @@ data/raw/
 data/processed/
 data/models/
 
+# models — too large for git (download from Colab)
+models/
+
 # os
 .DS_Store
 Thumbs.db
