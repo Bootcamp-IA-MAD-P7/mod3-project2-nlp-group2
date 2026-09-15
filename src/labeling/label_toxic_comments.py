@@ -1,13 +1,3 @@
-"""
-Phase 1a — Binary toxicity filter.
-
-Reads raw scraped comments, runs JungleLee/bert-toxic-comment-classification,
-keeps only toxic ones, exports to timestamped CSV.
-
-Output: data/processed/labeled_comments_YYYYMMDD_HHMMSS.csv
-        Columns: CommentId, VideoId, Text, IsToxic
-"""
-
 import os
 from datetime import datetime
 
@@ -18,7 +8,7 @@ from transformers import pipeline
 BINARY_MODEL = "JungleLee/bert-toxic-comment-classification"
 BINARY_THRESHOLD = 0.7
 
-INPUT_PATH = "data/raw/scraped/youtube_comments_20260911_140424.csv"
+INPUT_PATH = "data/raw/scraped/youtube_comments_20260914_114612.csv"
 
 _RUN_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 OUTPUT_PATH = f"data/processed/labeled_comments_{_RUN_TIMESTAMP}.csv"
