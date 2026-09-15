@@ -3,18 +3,29 @@ name = "mod3-project2-nlp-group2"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "jupyter>=1.1.1",
     "mlflow>=3.16.0",
     "nltk>=3.9",
-    "notebook==6.5.7",
+    "notebook>=7.0",
     "optuna>=5.0.0",
     "pandas>=3.0.5",
     "python-dotenv>=1.2.3",
     "scikit-learn>=1.9.1",
-    "tornado==6.3.3",
+    "tornado>=6.3",
     "matplotlib>=3.10",
     "seaborn>=0.13",
     "wordcloud>=1.9",
+    "torch",
+    "transformers",
+    "accelerate",
 ]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
