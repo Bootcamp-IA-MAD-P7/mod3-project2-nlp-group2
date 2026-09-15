@@ -5,9 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "datetime>=6.0",
-    "google-api-python-client>=2.200.0",
-    "kagglehub>=1.0.2",
-    "polars>=1.44.2",
+    "jupyter>=1.1.1",
+    "mlflow>=3.16.0",
+    "nltk>=3.9",
+    "notebook==6.5.7",
+    "optuna>=5.0.0",
+    "pandas>=3.0.5",
     "python-dotenv>=1.2.3",
+    "scikit-learn>=1.9.1",
+    "tornado==6.3.3",
+    "matplotlib>=3.10",
+    "seaborn>=0.13",
+    "wordcloud>=1.9",
 ]
