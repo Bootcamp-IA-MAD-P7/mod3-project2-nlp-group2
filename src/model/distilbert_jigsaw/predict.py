@@ -1,13 +1,14 @@
 import torch
 import json
 import numpy as np
+from huggingface_hub import hf_hub_download
 from transformers import (
     DistilBertTokenizerFast,
     DistilBertForSequenceClassification,
     pipeline,
 )
 
-MODEL_DIR = "models/distilbert_jigsaw"
+MODEL_DIR = "Anahia/distilbert-jigsaw-toxicity-multilabel"
 ZEROSHOT_MODEL = "cross-encoder/nli-deberta-v3-small"
 
 DISTILBERT_LABELS = ["IsToxic", "IsObscene", "IsThreat", "IsAbusive", "IsHatespeech"]

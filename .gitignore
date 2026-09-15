@@ -19,6 +19,7 @@ build/
 data/raw/
 data/processed/
 data/models/
+models/
 
 # os
 .DS_Store

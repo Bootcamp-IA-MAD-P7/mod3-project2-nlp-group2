@@ -8,6 +8,7 @@ dependencies = [
     "datasets>=5.0.1",
     "datetime>=6.0",
     "google-api-python-client>=2.200.0",
+    "huggingface-hub>=1.31.0",
     "kagglehub>=1.0.2",
     "numpy>=2.5.3",
     "pandas>=3.0.5",
