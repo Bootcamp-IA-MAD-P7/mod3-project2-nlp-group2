@@ -30,7 +30,12 @@ SHARED_THRESHOLD = 0.6
 GATEKEEPER_THRESHOLD = 0.6
 ZEROSHOT_ONLY_THRESHOLD = 0.7
 
-with open(f"{MODEL_DIR}/thresholds.json") as f:
+
+thresholds_path = hf_hub_download(
+    repo_id="Anahia/distilbert-jigsaw-toxicity-multilabel", filename="thresholds.json"
+)
+
+with open(thresholds_path) as f:
     best_thresholds = json.load(f)
 
 tokenizer = DistilBertTokenizerFast.from_pretrained(MODEL_DIR)
