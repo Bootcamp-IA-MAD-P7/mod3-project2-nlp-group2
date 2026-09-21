@@ -4,6 +4,7 @@ import time
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from googleapiclient.discovery import build
 from pydantic import BaseModel
 
@@ -30,6 +31,14 @@ LABEL_DISPLAY = {
 }
 
 app = FastAPI()
+
+# Allows the Vite dev server (frontend) to call this API from the browser.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class CommentResponse(BaseModel):
