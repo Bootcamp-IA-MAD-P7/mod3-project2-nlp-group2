@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-09-18 09:44:05",
+  "split": "validation",
+  "best_thresholds": {
+    "IsToxic": 0.6,
+    "IsObscene": 0.5,
+    "IsThreat": 0.35,
+    "IsAbusive": 0.45,
+    "IsHatespeech": 0.45
+  },
+  "classification_report": {
+    "IsToxic": {
+      "precision": 0.9359823399558499,
+      "recall": 0.978246539222149,
+      "f1-score": 0.9566478646253022,
+      "support": 3034.0
+    },
+    "IsObscene": {
+      "precision": 0.8967109059434507,
+      "recall": 0.9401088929219601,
+      "f1-score": 0.9178972238629651,
+      "support": 1653.0
+    },
+    "IsThreat": {
+      "precision": 0.638095238095238,
+      "recall": 0.7613636363636364,
+      "f1-score": 0.694300518134715,
+      "support": 88.0
+    },
+    "IsAbusive": {
+      "precision": 0.8328358208955224,
+      "recall": 0.8948043617703656,
+      "f1-score": 0.862708719851577,
+      "support": 1559.0
+    },
+    "IsHatespeech": {
+      "precision": 0.8104838709677419,
+      "recall": 0.767175572519084,
+      "f1-score": 0.788235294117647,
+      "support": 262.0
+    },
+    "micro avg": {
+      "precision": 0.8922388920946336,
+      "recall": 0.937689508793208,
+      "f1-score": 0.9143997634535778,
+      "support": 6596.0
+    },
+    "macro avg": {
+      "precision": 0.8228216351715606,
+      "recall": 0.8683398005594389,
+      "f1-score": 0.8439579241184413,
+      "support": 6596.0
+    },
+    "weighted avg": {
+      "precision": 0.8928022660510342,
+      "recall": 0.937689508793208,
+      "f1-score": 0.914544075079129,
+      "support": 6596.0
+    },
+    "samples avg": {
+      "precision": 0.43597329224447867,
+      "recall": 0.4588700564971751,
+      "f1-score": 0.4399710176828821,
+      "support": 6596.0
+    }
+  }
+}
