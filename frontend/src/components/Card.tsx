@@ -67,8 +67,8 @@ export function Card({ comment, isTop, depth, onDecide }: CardProps) {
                 height: "100%",
                 borderRadius: 20,
                 background: toxic
-                    ? "radial-gradient(circle at center, #FCEBEB 5%, #F09595 150%)"
-                    : "radial-gradient(circle at center, #EAF3DE 5%, #4B5C3F 150%)",
+                    ? "radial-gradient(circle at center, #FCEBEB 5%, #FF0000 150%)"
+                    : "radial-gradient(circle at center, #EAF3DE 5%, #074a01 150%)",
                 boxShadow: "0 4px 14px rgba(0,0,0,0.15)", // contained shadow, not a large blur
                 padding: 28,
                 boxSizing: "border-box",

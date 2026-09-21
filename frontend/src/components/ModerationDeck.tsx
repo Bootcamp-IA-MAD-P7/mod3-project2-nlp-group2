@@ -11,7 +11,7 @@ export function ModerationDeck({ queue, onDecide }: ModerationDeckProps) {
         <div
             style={{
                 position: "relative",
-                width: "min(660px, 100%)",
+                width: "min(800px, 100%)",
                 height: "min(400px, 100%)",
                 aspectRatio: "660 / 400",
                 margin: "0 auto",
