@@ -4,18 +4,15 @@ from sklearn.dummy import DummyClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.multioutput import MultiOutputClassifier
-from sklearn.pipeline import Pipeline
 
 TRAIN_PATH = "data/processed/train.csv"
 VAL_PATH = "data/processed/val.csv"
 MODEL_PATH = "models/tfidf_lr.joblib"
 
-LABELS = [
-    "IsToxic", "IsAbusive", "IsThreat", "IsProvocative", "IsObscene",
-    "IsHatespeech", "IsRacist", "IsNationalist", "IsSexist",
-    "IsHomophobic", "IsReligiousHate", "IsRadicalism"
-]
+NON_LABEL_COLS = {"CommentId", "clean_text"}
+
+def get_labels(csv_path):
+    return [c for c in pd.read_csv(csv_path, nrows=0).columns if c not in NON_LABEL_COLS]
 
 
 class MultiLabelPipeline:
@@ -34,6 +31,7 @@ def main():
     train = pd.read_csv(TRAIN_PATH)
     val = pd.read_csv(VAL_PATH)
 
+    LABELS = get_labels(TRAIN_PATH)
     X_train, y_train = train["clean_text"], train[LABELS]
     X_val, y_val = val["clean_text"], val[LABELS]
 
