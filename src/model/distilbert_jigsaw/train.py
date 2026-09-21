@@ -113,3 +113,19 @@ for epoch in range(EPOCHS):
         model.save_pretrained(OUTPUT_DIR, safe_serialization=True)
         tokenizer.save_pretrained(OUTPUT_DIR)
         print(f"Best model saved at epoch {epoch + 1}")
+os.makedirs("reports", exist_ok=True)
+
+report_dict = classification_report(
+    test_labels, preds, target_names=LABELS, zero_division=0, output_dict=True
+)
+
+results = {
+    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "split": "test",
+    "thresholds_used": thresholds,
+    "classification_report": report_dict,
+}
+
+with open("reports/test_results.json", "w") as f:
+    json.dump(results, f, indent=2)
+print("Test results saved to reports/test_results.json")

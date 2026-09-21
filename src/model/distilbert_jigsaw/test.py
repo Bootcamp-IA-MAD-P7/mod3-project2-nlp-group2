@@ -1,21 +1,23 @@
-import json
 import os
 from datetime import datetime
+import json
 import pandas as pd
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassification
-from sklearn.metrics import f1_score, recall_score, classification_report
+from sklearn.metrics import classification_report, recall_score
 
 LABELS = ["IsToxic", "IsObscene", "IsThreat", "IsAbusive", "IsHatespeech"]
 MODEL_DIR = "models/distilbert_jigsaw"
 THRESHOLDS_PATH = "models/distilbert_jigsaw/thresholds.json"
-REPORTS_DIR = "reports"
 BATCH_SIZE = 32
 MAX_LEN = 128
 
-val_df = pd.read_csv("data/processed/val.csv")
+test_df = pd.read_csv("data/processed/test.csv")
+
+with open(THRESHOLDS_PATH) as f:
+    thresholds = json.load(f)
 
 tokenizer = DistilBertTokenizerFast.from_pretrained(MODEL_DIR)
 model = DistilBertForSequenceClassification.from_pretrained(MODEL_DIR)
@@ -24,7 +26,7 @@ model.to(device)
 model.eval()
 
 
-class EvalDataset(Dataset):
+class TestDataset(Dataset):
     def __init__(self, df, tokenizer, max_len):
         self.texts = df["text"].tolist()
         self.labels = df[LABELS].values.astype(np.float32)
@@ -49,14 +51,14 @@ class EvalDataset(Dataset):
         }
 
 
-val_dataset = EvalDataset(val_df, tokenizer, MAX_LEN)
-val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE)
+test_dataset = TestDataset(test_df, tokenizer, MAX_LEN)
+test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
 all_probs = []
 all_labels = []
 
 with torch.no_grad():
-    for batch in val_loader:
+    for batch in test_loader:
         input_ids = batch["input_ids"].to(device)
         attention_mask = batch["attention_mask"].to(device)
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
@@ -64,54 +66,39 @@ with torch.no_grad():
         all_probs.append(probs)
         all_labels.append(batch["labels"].numpy())
 
-val_probs = np.vstack(all_probs)
-val_labels = np.vstack(all_labels)
+test_probs = np.vstack(all_probs)
+test_labels = np.vstack(all_labels)
 
-thresholds = np.arange(0.1, 0.9, 0.05)
-best_thresholds = {}
-
+preds = np.zeros_like(test_probs)
 for i, label in enumerate(LABELS):
-    scores = [
-        f1_score(val_labels[:, i], (val_probs[:, i] >= t).astype(int), zero_division=0)
-        for t in thresholds
-    ]
-    best_t = thresholds[np.argmax(scores)]
-    best_thresholds[label] = round(float(best_t), 2)
+    preds[:, i] = (test_probs[:, i] >= thresholds[label]).astype(int)
 
-    preds_at_best = (val_probs[:, i] >= best_t).astype(int)
-    f1 = round(float(max(scores)), 4)
-    recall = round(
-        float(recall_score(val_labels[:, i], preds_at_best, zero_division=0)), 4
-    )
-
-    print(
-        f"{label} — best_threshold: {best_t:.2f} | F1: {f1:.4f} | Recall: {recall:.4f}"
-    )
-
-print("\nBest thresholds:", best_thresholds)
-
-preds = np.zeros_like(val_probs)
+per_label_recall = {}
 for i, label in enumerate(LABELS):
-    preds[:, i] = (val_probs[:, i] >= best_thresholds[label]).astype(int)
+    per_label_recall[label] = round(
+        float(recall_score(test_labels[:, i], preds[:, i], zero_division=0)), 4
+    )
+    print(f"{label} — Recall: {per_label_recall[label]:.4f}")
 
 print(
-    "\n", classification_report(val_labels, preds, target_names=LABELS, zero_division=0)
+    "\n",
+    classification_report(test_labels, preds, target_names=LABELS, zero_division=0),
 )
 
-with open(THRESHOLDS_PATH, "w") as f:
-    json.dump(best_thresholds, f, indent=2)
-print("Thresholds saved.")
+os.makedirs("reports", exist_ok=True)
 
-os.makedirs(REPORTS_DIR, exist_ok=True)
+report_dict = classification_report(
+    test_labels, preds, target_names=LABELS, zero_division=0, output_dict=True
+)
+
 results = {
     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    "split": "validation",
-    "best_thresholds": best_thresholds,
-    "classification_report": classification_report(
-        val_labels, preds, target_names=LABELS, zero_division=0, output_dict=True
-    ),
+    "split": "test",
+    "thresholds_used": thresholds,
+    "per_label_recall": per_label_recall,
+    "classification_report": report_dict,
 }
 
-with open(f"{REPORTS_DIR}/evaluate_results.json", "w") as f:
+with open("reports/test_results.json", "w") as f:
     json.dump(results, f, indent=2)
-print(f"Report saved to {REPORTS_DIR}/evaluate_results.json")
+print("Test results saved to reports/test_results.json")
