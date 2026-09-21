@@ -144,10 +144,19 @@ cp .env.example .env   # add YOUTUBE_API_KEY
 uv run main.py
 ```
 
+## Docker
+
+```bash
+docker compose up --build
+```
+
+The app will be available at `http://localhost:8000`. Models are cached in a Docker volume to avoid re-downloading on restarts. Make sure your `.env` file contains `YOUTUBE_API_KEY`.
+
 ## Project Structure
 
 ```
 ├── app/main.py                          # FastAPI backend
+├── front/                               # static frontend (HTML/CSS/JS)
 ├── src/
 │   ├── model/distilbert_jigsaw/
 │   │   ├── train.py                     # fine-tuning loop
@@ -159,5 +168,6 @@ uv run main.py
 │   └── reports/                         # evaluation and test results
 ├── models/distilbert_jigsaw/            # saved weights + thresholds.json
 ├── notebooks/                           # EDA
-└── tests/
+├── Dockerfile
+└── docker-compose.yml
 ```
