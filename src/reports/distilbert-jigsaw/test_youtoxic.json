@@ -1,0 +1,102 @@
+{
+  "timestamp": "2026-09-21 08:28:12",
+  "input": "/content/youtoxic_english_1000.csv",
+  "classification_report": {
+    "IsToxic": {
+      "precision": 0.7370786516853932,
+      "recall": 0.70995670995671,
+      "f1-score": 0.7232635060639471,
+      "support": 462.0
+    },
+    "IsAbusive": {
+      "precision": 0.8333333333333334,
+      "recall": 0.36827195467422097,
+      "f1-score": 0.5108055009823183,
+      "support": 353.0
+    },
+    "IsThreat": {
+      "precision": 0.10526315789473684,
+      "recall": 0.09523809523809523,
+      "f1-score": 0.1,
+      "support": 21.0
+    },
+    "IsProvocative": {
+      "precision": 0.20689655172413793,
+      "recall": 0.5217391304347826,
+      "f1-score": 0.2962962962962963,
+      "support": 161.0
+    },
+    "IsObscene": {
+      "precision": 0.42328042328042326,
+      "recall": 0.8,
+      "f1-score": 0.5536332179930796,
+      "support": 100.0
+    },
+    "IsHatespeech": {
+      "precision": 0.6666666666666666,
+      "recall": 0.18840579710144928,
+      "f1-score": 0.2937853107344633,
+      "support": 138.0
+    },
+    "IsRacist": {
+      "precision": 0.23008849557522124,
+      "recall": 0.416,
+      "f1-score": 0.2962962962962963,
+      "support": 125.0
+    },
+    "IsNationalist": {
+      "precision": 0.18181818181818182,
+      "recall": 0.25,
+      "f1-score": 0.21052631578947367,
+      "support": 8.0
+    },
+    "IsSexist": {
+      "precision": 0.011494252873563218,
+      "recall": 1.0,
+      "f1-score": 0.022727272727272728,
+      "support": 1.0
+    },
+    "IsHomophobic": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "IsReligiousHate": {
+      "precision": 0.23809523809523808,
+      "recall": 0.4166666666666667,
+      "f1-score": 0.30303030303030304,
+      "support": 12.0
+    },
+    "IsRadicalism": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "micro avg": {
+      "precision": 0.3873431533006001,
+      "recall": 0.5141202027516293,
+      "f1-score": 0.4418170504044804,
+      "support": 1381.0
+    },
+    "macro avg": {
+      "precision": 0.3028345794122413,
+      "recall": 0.39718986283932706,
+      "f1-score": 0.27586366832612086,
+      "support": 1381.0
+    },
+    "weighted avg": {
+      "precision": 0.6065388571529333,
+      "recall": 0.5141202027516293,
+      "f1-score": 0.5087268779906685,
+      "support": 1381.0
+    },
+    "samples avg": {
+      "precision": 0.17537936507936508,
+      "recall": 0.24128333333333332,
+      "f1-score": 0.1923905538905539,
+      "support": 1381.0
+    }
+  }
+}

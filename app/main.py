@@ -1,5 +1,4 @@
 import os
-import random
 import re
 import time
 
@@ -14,17 +13,6 @@ load_dotenv()
 
 API_KEY: str = os.getenv("YOUTUBE_API_KEY")
 youtube = build("youtube", "v3", developerKey=API_KEY)
-
-SEARCH_QUERIES: list[str] = [
-    "politics",
-    "AI",
-    "religion",
-    "feminism",
-    "gaming",
-    "reaction",
-    "prank",
-    "commentary",
-]
 
 LABEL_DISPLAY = {
     "IsToxic": "toxic",
@@ -55,19 +43,11 @@ class CommentResponse(BaseModel):
     reasons: list[str]
 
 
-def search_videos(query: str, max_results: int = 10) -> list[str]:
-    response = (
-        youtube.search()
-        .list(
-            part="id",
-            q=query,
-            type="video",
-            maxResults=max_results,
-            relevanceLanguage="en",
-        )
-        .execute()
-    )
-    return [item["id"]["videoId"] for item in response.get("items", [])]
+def extract_video_id(url: str) -> str:
+    match = re.search(r"(?:v=|/)([\w-]{11})", url)
+    if not match:
+        raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+    return match.group(1)
 
 
 def fetch_comments(video_id: str, max_comments: int = 10) -> list[dict]:
@@ -130,23 +110,9 @@ def classify_comment(comment: dict) -> CommentResponse:
     )
 
 
-@app.get("/comments/random", response_model=list[CommentResponse])
-def get_random_comments():
-    query = random.choice(SEARCH_QUERIES)
-    video_ids = search_videos(query, max_results=10)
-    if not video_ids:
-        raise HTTPException(status_code=404, detail="No videos found")
-    video_id = random.choice(video_ids)
-    comments = fetch_comments(video_id, max_comments=10)
-    return [classify_comment(c) for c in comments]
-
-
 @app.get("/comments/video", response_model=list[CommentResponse])
 def get_video_comments(url: str):
-    match = re.search(r"(?:v=|/)([\w-]{11})", url)
-    if not match:
-        raise HTTPException(status_code=400, detail="Invalid YouTube URL")
-    video_id = match.group(1)
+    video_id = extract_video_id(url)
     comments = fetch_comments(video_id, max_comments=10)
     return [classify_comment(c) for c in comments]
 
