@@ -35,6 +35,55 @@ For each comment, both models run in parallel:
 - The 5 Jigsaw labels use a weighted ensemble: **60% DistilBERT + 40% zero-shot**, with a combined threshold of 0.6.
 - The 7 zero-shot-only labels use a two-gate system: DistilBERT's `IsToxic` or `IsHatespeech` score must exceed 0.6 (gatekeeper), and the zero-shot score must independently exceed 0.7. Both gates must pass for a label to fire. This makes the system conservative by design — ambiguous language that doesn't already read as toxic to DistilBERT will not be flagged.
 
+## Alternative Approach — TF-IDF + Logistic Regression & DistilBERT on YouToxic
+
+A parallel implementation trained directly on the YouToxic dataset (1,000 labeled English comments) as an alternative and baseline comparison.
+
+### Models
+
+**TF-IDF + Logistic Regression (multi-label baseline)**
+A custom `MultiLabelPipeline` that vectorizes text with TF-IDF (10,000 features, unigrams + bigrams) and trains one `LogisticRegression(class_weight="balanced")` per label — falling back to `DummyClassifier(most_frequent)` for labels with no positive examples. Predicts all 12 categories.
+
+Available on HuggingFace: `KariRomero/tfidf-lr-youtoxic`
+
+**DistilBERT fine-tuned on YouToxic**
+`distilbert-base-uncased` fine-tuned on the YouToxic dataset for binary toxicity detection (`IsToxic` only).
+
+Available on HuggingFace: `KariRomero/distilbert-youtoxic`
+
+### Dataset split
+
+Stratified by `IsToxic` — Train: 700 / Val: 150 / Test: 150. Each split has 14 columns: `CommentId`, `clean_text`, and 12 binary labels.
+
+### Preprocessing
+
+Applied in `src/data/prepare_dataset.py`: lowercase, URL and mention removal, punctuation and number removal, stopword removal (NLTK), lemmatization (WordNetLemmatizer).
+
+### Known limitations
+
+`IsNationalist`, `IsSexist`, `IsHomophobic`, and `IsRadicalism` have near-zero positive examples in the 1,000-comment dataset. Both models predict 0 for these labels consistently.
+
+### Setup
+
+```bash
+# train TF-IDF + LR
+uv run python src/model/train.py
+
+# download pre-trained TF-IDF + LR
+hf download KariRomero/tfidf-lr-youtoxic tfidf_lr.joblib --local-dir models/
+
+# evaluate TF-IDF + LR
+uv run python src/model/evaluate.py
+
+# download pre-trained DistilBERT
+hf download KariRomero/distilbert-youtoxic --local-dir models/distilbert_youtoxic
+
+# evaluate DistilBERT
+uv run python src/model/evaluate_distilbert.py
+```
+
+DistilBERT fine-tuning requires GPU — use `notebooks/train_distilbert_colab.ipynb` on Google Colab with T4 runtime.
+
 ## Jigsaw Validation Results
 
 Evaluated on the Jigsaw validation split. Thresholds were optimized per label via F1 maximization on this same split before evaluation.
