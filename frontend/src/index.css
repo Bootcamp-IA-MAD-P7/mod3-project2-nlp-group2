@@ -1,0 +1,45 @@
+@font-face {
+    font-family: "YouTube Sans";
+    src: url("/fonts/YouTubeSansRegular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "YouTube Sans";
+    src: url("/fonts/YouTubeSansSemibold.otf") format("opentype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "YouTube Sans";
+    src: url("/fonts/YouTubeSansBold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "YouTube Sans";
+    src: url("/fonts/YouTubeSansBlack.otf") format("opentype");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: "YouTube Sans", system-ui, sans-serif;
+}
