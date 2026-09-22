@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 interface SidebarProps {
-    onLoadVideo: (videoId: string) => void
+    onLoadVideo: (videoId: string) => Promise<void>
     onLoadComment: (commentId: string) => Promise<void>
     onHome: () => void
     onLoadMore: () => void
@@ -21,11 +21,18 @@ export function Sidebar({
     const [commentId, setCommentId] = useState("")
     const [open, setOpen] = useState(false)
     const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
+    const [videoStatus, setVideoStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
 
-    function submitVideo() {
+    async function submitVideo() {
         if (videoId.trim() === "") return
-        onLoadVideo(videoId.trim())
-        setVideoId("")
+        setVideoStatus("loading")
+        try {
+            await onLoadVideo(videoId.trim())
+            setVideoStatus("done")
+            setVideoId("")
+        } catch {
+            setVideoStatus("error")
+        }
     }
 
     async function submitComment() {
@@ -141,6 +148,15 @@ export function Sidebar({
                         boxSizing: "border-box",
                     }}
                 />
+                {videoStatus === "loading" && (
+                    <span style={{ fontSize: 12, color: "#9a9a9a" }}>Loading...</span>
+                )}
+                {videoStatus === "done" && (
+                    <span style={{ fontSize: 12, color: "#30a46c" }}>Comments added to queue</span>
+                )}
+                {videoStatus === "error" && (
+                    <span style={{ fontSize: 12, color: "#e5484d" }}>Video not found</span>
+                )}
             </div>
 
             {/* Single-comment lookup. Arrow toggles a field for an id or a link. */}
