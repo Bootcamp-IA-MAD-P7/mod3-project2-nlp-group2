@@ -1,8 +1,8 @@
 import { useState } from "react"
 
 interface SidebarProps {
-    onLoadVideo: (link: string) => void
-    onLoadComment: (idOrLink: string) => void
+    onLoadVideo: (videoId: string) => void
+    onLoadComment: (videoId: string, commentId: string) => void
     onHome: () => void
     onLoadMore: () => void
 }
@@ -17,20 +17,20 @@ export function Sidebar({
     onHome,
     onLoadMore,
 }: SidebarProps) {
-    const [videoLink, setVideoLink] = useState("")
-    const [commentValue, setCommentValue] = useState("")
+    const [videoId, setVideoId] = useState("")
+    const [commentId, setCommentId] = useState("")
     const [open, setOpen] = useState(false)
 
     function submitVideo() {
-        if (videoLink.trim() === "") return
-        onLoadVideo(videoLink)
-        setVideoLink("")
+        if (videoId.trim() === "") return
+        onLoadVideo(videoId.trim())
+        setVideoId("")
     }
 
     function submitComment() {
-        if (commentValue.trim() === "") return
-        onLoadComment(commentValue)
-        setCommentValue("")
+        if (videoId.trim() === "" || commentId.trim() === "") return
+        onLoadComment(videoId.trim(), commentId.trim())
+        setCommentId("")
         setOpen(false)
     }
 
@@ -117,12 +117,12 @@ export function Sidebar({
                     />
                 </svg>
                 <input
-                    value={videoLink}
-                    onChange={(e) => setVideoLink(e.target.value)}
+                    value={videoId}
+                    onChange={(e) => setVideoId(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") submitVideo()
                     }}
-                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    placeholder="Video ID, e.g. 04kJtp6pVXI"
                     style={{
                         width: "100%",
                         height: 38,
@@ -178,12 +178,12 @@ export function Sidebar({
                         }}
                     >
                         <input
-                            value={commentValue}
-                            onChange={(e) => setCommentValue(e.target.value)}
+                            value={commentId}
+                            onChange={(e) => setCommentId(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") submitComment()
                             }}
-                            placeholder="Comment id or link"
+                            placeholder="Comment ID"
                             style={{
                                 width: "100%",
                                 height: 36,
