@@ -90,7 +90,14 @@ export function Card({ comment, isTop, depth, onDecide }: CardProps) {
             </span>
 
             {/* The comment text. Anonymous card: no author, photo, or date. */}
-            <p style={{ margin: "auto 10px", fontSize: 36, wordBreak: "break-word", overflowWrap: "break-word", overflow: "hidden" }}>
+            <p style={{
+                margin: "0 10px",
+                fontSize: 36,
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                overflowY: "auto",
+                maxHeight: "60%",
+            }}>
                 {comment.text}
             </p>
 
