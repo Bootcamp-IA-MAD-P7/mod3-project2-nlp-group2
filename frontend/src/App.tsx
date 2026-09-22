@@ -53,6 +53,7 @@ export default function App() {
                 })
             } catch (e) {
                 setError(e instanceof Error ? e.message : String(e))
+                throw e
             }
         },
         [nextId],
