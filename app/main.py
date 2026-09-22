@@ -4,12 +4,13 @@ import re
 import time
 from pathlib import Path
 
+import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from googleapiclient.discovery import build
-from huggingface_hub import InferenceClient, hf_hub_download
+from huggingface_hub import hf_hub_download
 from pydantic import BaseModel
 
 load_dotenv()
@@ -46,7 +47,7 @@ thresholds_path = hf_hub_download(
 with open(thresholds_path) as f:
     best_thresholds = json.load(f)
 
-client = InferenceClient(token=os.getenv("HF_TOKEN"))
+HF_HEADERS = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
 
 LABEL_DISPLAY = {
     "IsToxic": "toxic",
@@ -88,7 +89,14 @@ class CommentResponse(BaseModel):
 
 
 def get_distilbert_probs(text: str) -> dict[str, float]:
-    out = client.text_classification(text, model=DISTILBERT_MODEL)
+    response = requests.post(
+        f"https://api-inference.huggingface.co/models/{DISTILBERT_MODEL}",
+        headers=HF_HEADERS,
+        json={"inputs": text},
+    )
+    out = response.json()
+    if isinstance(out, list) and isinstance(out[0], list):
+        out = out[0]
     probs = {item["label"]: float(item["score"]) for item in out}
     return {label: probs.get(label, 0.0) for label in DISTILBERT_LABELS}
 
@@ -96,12 +104,18 @@ def get_distilbert_probs(text: str) -> dict[str, float]:
 def predict(text: str) -> tuple[dict[str, bool], float]:
     db_probs = get_distilbert_probs(text)
 
-    zs_out = client.zero_shot_classification(
-        text,
-        labels=list(ZEROSHOT_LABEL_MAP.keys()),
-        multi_label=True,
-        model=ZEROSHOT_MODEL,
+    response = requests.post(
+        f"https://api-inference.huggingface.co/models/{ZEROSHOT_MODEL}",
+        headers=HF_HEADERS,
+        json={
+            "inputs": text,
+            "parameters": {
+                "candidate_labels": list(ZEROSHOT_LABEL_MAP.keys()),
+                "multi_label": True,
+            },
+        },
     )
+    zs_out = response.json()
     zs_scores = dict(zip(zs_out["labels"], zs_out["scores"]))
 
     results = {}
