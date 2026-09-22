@@ -1,6 +1,6 @@
 import { startTransition, useCallback, useState } from "react"
 import type { CommentItem, Decision, DecisionLogItem } from "./types"
-import { EXTRA_SEED, INITIAL_QUEUE } from "./data/seed"
+import { INITIAL_QUEUE } from "./data/seed"
 import {
     fetchSingleComment,
     fetchVideoComments,
@@ -67,24 +67,7 @@ export default function App() {
     // Sidebar button. Adds more comments.
     const loadMore = useCallback(async () => {
         setError(null)
-        if (!currentVideoId) {
-            // No video loaded yet — fall back to seed.
-            startTransition(() => {
-                setQueue((prev) => [
-                    ...prev,
-                    ...EXTRA_SEED.map((item, index) => ({
-                        id: nextId + index,
-                        text: item.text,
-                        prediction: item.prediction,
-                        score: item.score,
-                        is_toxic: item.is_toxic,
-                        reasons: item.reasons,
-                    })),
-                ])
-                setNextId((id) => id + EXTRA_SEED.length)
-            })
-            return
-        }
+        if (!currentVideoId) return
         try {
             const comments = await fetchVideoComments(currentVideoId)
             startTransition(() => {

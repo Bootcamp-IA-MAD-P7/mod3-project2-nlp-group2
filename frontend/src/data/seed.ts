@@ -1,6 +1,6 @@
 import type { CommentItem } from "../types"
 
-// --- Seed data. Test only, while there is no backend. Real comments come from the API. ---
+// --- Seed data. Kept for dev reference only — the live queue starts empty. ---
 export const SEED: CommentItem[] = [
     {
         id: 1,
@@ -28,7 +28,7 @@ export const SEED: CommentItem[] = [
     },
 ]
 
-export const EXTRA_SEED: Array<Omit<CommentItem, "id">> = [
+export const EXTRA_SEED_DEV: Array<Omit<CommentItem, "id">> = [
     {
         text: "Excellent editing, everything is clear.",
         prediction: "nontoxic",
@@ -52,5 +52,6 @@ export const EXTRA_SEED: Array<Omit<CommentItem, "id">> = [
     },
 ]
 
-// Switch. SEED shows cards for the demo. Change to [] to start empty, like production.
-export const INITIAL_QUEUE: CommentItem[] = SEED
+// Live values. Production starts with no cards until a video is loaded.
+export const INITIAL_QUEUE: CommentItem[] = []
+export const EXTRA_SEED: CommentItem[] = []
