@@ -94,6 +94,26 @@ export function Card({ comment, isTop, depth, onDecide }: CardProps) {
                 {comment.text}
             </p>
 
+            {comment.reasons.length > 0 && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
+                    {comment.reasons.map((r) => (
+                        <span
+                            key={r}
+                            style={{
+                                background: "#7f1d1d",
+                                color: "#fca5a5",
+                                borderRadius: 12,
+                                padding: "2px 10px",
+                                fontSize: 12,
+                                fontWeight: 600,
+                            }}
+                        >
+                            {r}
+                        </span>
+                    ))}
+                </div>
+            )}
+
             {isTop && (
                 <div
                     style={{

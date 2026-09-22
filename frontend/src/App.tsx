@@ -79,6 +79,7 @@ export default function App() {
                         text: item.text,
                         prediction: item.prediction,
                         score: item.score,
+                        reasons: item.reasons,
                     })),
                 ])
                 setNextId((id) => id + EXTRA_SEED.length)

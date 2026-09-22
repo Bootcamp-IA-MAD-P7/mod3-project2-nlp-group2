@@ -30,5 +30,7 @@ export function toCommentItem(api: CommentResponse, id: number): CommentItem {
         text: api.text,
         prediction: api.is_toxic ? "toxic" : "nontoxic",
         score: api.score,
+        is_toxic: api.is_toxic,
+        reasons: api.reasons,
     }
 }
