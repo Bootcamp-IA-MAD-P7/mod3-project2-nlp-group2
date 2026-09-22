@@ -224,11 +224,28 @@ def get_video_comments(video_id: str):
 
 
 @app.get("/comments/comment", response_model=CommentResponse)
-def get_single_comment(video_id: str, comment_id: str):
-    comments = fetch_comments(video_id, max_comments=100)
-    comment = next((c for c in comments if c["comment_id"] == comment_id), None)
-    if not comment:
+def get_single_comment(comment_id: str):
+    response = (
+        youtube.comments()
+        .list(
+            part="snippet",
+            id=comment_id,
+            textFormat="plainText",
+        )
+        .execute()
+    )
+    items = response.get("items", [])
+    if not items:
         raise HTTPException(status_code=404, detail="Comment not found")
+    snippet = items[0]["snippet"]
+    comment = {
+        "video_id": snippet.get("videoId", ""),
+        "comment_id": comment_id,
+        "text": snippet["textDisplay"],
+        "author": snippet["authorDisplayName"],
+        "likes": snippet["likeCount"],
+        "published_at": snippet["publishedAt"],
+    }
     return classify_comment(comment)
 
 

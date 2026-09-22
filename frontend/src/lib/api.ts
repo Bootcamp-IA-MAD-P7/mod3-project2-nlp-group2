@@ -18,8 +18,8 @@ export async function fetchVideoComments(videoId: string): Promise<CommentRespon
     return res.json()
 }
 
-export async function fetchSingleComment(videoId: string, commentId: string): Promise<CommentResponse> {
-    const res = await fetch(`/comments/comment?video_id=${encodeURIComponent(videoId)}&comment_id=${encodeURIComponent(commentId)}`)
+export async function fetchSingleComment(commentId: string): Promise<CommentResponse> {
+    const res = await fetch(`/comments/comment?comment_id=${encodeURIComponent(commentId)}`)
     if (!res.ok) throw new Error(await res.text())
     return res.json()
 }

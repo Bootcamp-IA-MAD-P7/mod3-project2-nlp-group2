@@ -41,17 +41,14 @@ export default function App() {
         [nextId],
     )
 
-    // Brings a single comment. The sidebar supplies both bare IDs.
+    // Brings a single comment by its bare ID.
     const loadComment = useCallback(
-        async (videoId: string, commentId: string) => {
+        async (commentId: string) => {
             setError(null)
             try {
-                const comment = await fetchSingleComment(videoId, commentId)
+                const comment = await fetchSingleComment(commentId)
                 startTransition(() => {
-                    setQueue((prev) => [
-                        toCommentItem(comment, nextId),
-                        ...prev,
-                    ])
+                    setQueue((prev) => [toCommentItem(comment, nextId), ...prev])
                     setNextId((id) => id + 1)
                 })
             } catch (e) {

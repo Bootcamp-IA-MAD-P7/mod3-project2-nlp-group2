@@ -2,7 +2,7 @@ import { useState } from "react"
 
 interface SidebarProps {
     onLoadVideo: (videoId: string) => void
-    onLoadComment: (videoId: string, commentId: string) => void
+    onLoadComment: (commentId: string) => void
     onHome: () => void
     onLoadMore: () => void
 }
@@ -28,8 +28,8 @@ export function Sidebar({
     }
 
     function submitComment() {
-        if (videoId.trim() === "" || commentId.trim() === "") return
-        onLoadComment(videoId.trim(), commentId.trim())
+        if (commentId.trim() === "") return
+        onLoadComment(commentId.trim())
         setCommentId("")
         setOpen(false)
     }
