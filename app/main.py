@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import re
 import time
 from pathlib import Path
@@ -166,8 +167,8 @@ def fetch_comments(video_id: str, max_comments: int = 10) -> list[dict]:
                 videoId=video_id,
                 maxResults=min(100, max_comments - len(comments)),
                 pageToken=next_page_token,
-                textFormat="plainText",
-                order="relevance",
+        textFormat="plainText",
+        order="time",
             )
             .execute()
         )
@@ -216,10 +217,10 @@ def classify_comment(comment: dict) -> CommentResponse:
 
 
 @app.get("/comments/video", response_model=list[CommentResponse])
-def get_video_comments(url: str):
-    video_id = extract_video_id(url)
-    comments = fetch_comments(video_id, max_comments=10)
-    return [classify_comment(c) for c in comments]
+def get_video_comments(video_id: str):
+    comments = fetch_comments(video_id, max_comments=30)
+    random.shuffle(comments)
+    return [classify_comment(c) for c in comments[:10]]
 
 
 @app.get("/comments/comment", response_model=CommentResponse)

@@ -134,7 +134,7 @@ The Jigsaw-trained labels (IsToxic, IsObscene, IsAbusive) perform strongest, whi
 | Endpoint | Description |
 |---|---|
 | `GET /health` | Health check — returns `{"status": "ok"}` |
-| `GET /comments/video?url={youtube_url}` | 10 comments from a specific video |
+| `GET /comments/video?video_id={id}` | 10 random comments (shuffled from the 30 most recent) |
 | `GET /comments/comment?video_id={id}&comment_id={id}` | Single comment by ID |
 
 All comment endpoints return `comment_id`, `video_id`, `text`, `author`, `likes`, `published_at`, `is_toxic`, `reasons`, and `score`.
