@@ -2,7 +2,7 @@ import { useState } from "react"
 
 interface SidebarProps {
     onLoadVideo: (videoId: string) => void
-    onLoadComment: (commentId: string) => void
+    onLoadComment: (commentId: string) => Promise<void>
     onHome: () => void
     onLoadMore: () => void
 }
@@ -20,6 +20,7 @@ export function Sidebar({
     const [videoId, setVideoId] = useState("")
     const [commentId, setCommentId] = useState("")
     const [open, setOpen] = useState(false)
+    const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle")
 
     function submitVideo() {
         if (videoId.trim() === "") return
@@ -27,11 +28,16 @@ export function Sidebar({
         setVideoId("")
     }
 
-    function submitComment() {
+    async function submitComment() {
         if (commentId.trim() === "") return
-        onLoadComment(commentId.trim())
-        setCommentId("")
-        setOpen(false)
+        setStatus("loading")
+        try {
+            await onLoadComment(commentId.trim())
+            setStatus("done")
+            setCommentId("")
+        } catch {
+            setStatus("error")
+        }
     }
 
     return (
@@ -211,6 +217,21 @@ export function Sidebar({
                         >
                             Load
                         </button>
+                        {status === "loading" && (
+                            <span style={{ color: "#9a9a9a", fontSize: 12 }}>
+                                Loading...
+                            </span>
+                        )}
+                        {status === "done" && (
+                            <span style={{ color: "#30a46c", fontSize: 12 }}>
+                                Comment added to queue
+                            </span>
+                        )}
+                        {status === "error" && (
+                            <span style={{ color: "#e5484d", fontSize: 12 }}>
+                                Not found
+                            </span>
+                        )}
                     </div>
                 )}
             </div>
