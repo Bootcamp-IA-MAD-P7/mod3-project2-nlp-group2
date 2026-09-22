@@ -35,7 +35,7 @@ For each comment, both models run:
 - The 5 Jigsaw labels use DistilBERT alone, compared against per-label thresholds from `thresholds.json` (F1-maximized on the validation set).
 - The 7 zero-shot-only labels use a two-gate system: DistilBERT's `IsToxic` or `IsHatespeech` score must exceed 0.6 (gatekeeper), and the zero-shot score must independently exceed 0.7. Both gates must pass for a label to fire. This makes the system conservative by design — ambiguous language that doesn't already read as toxic to DistilBERT will not be flagged.
 
-Inference calls the HuggingFace Inference API directly with `requests` (one POST for DistilBERT classification, one for zero-shot).
+Both models load locally at startup with `transformers` (DistilBERT tokenizer + weights, zero-shot classification pipeline on CPU/GPU). No HuggingFace Inference API calls — `HF_TOKEN` is only used to download the model weights from HuggingFace on first run.
 
 ## Alternative Approach — TF-IDF + Logistic Regression & DistilBERT on YouToxic
 
