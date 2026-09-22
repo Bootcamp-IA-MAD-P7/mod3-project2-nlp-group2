@@ -12,7 +12,7 @@ toxic · obscene · threat · abusive · hate speech · provocative · racist ·
 
 YouTube comments are overwhelmingly clean — most flagged words appear in neutral or educational contexts. A model optimized for precision would miss real hate speech; one optimized purely for recall would flood moderators with false positives. We optimized for **recall** to catch as much genuine toxicity as possible while keeping thresholds conservative enough to avoid flagging ambiguous language.
 
-Thresholds are per-label and tuned on the validation set via F1 maximization, but the prediction pipeline applies an additional gatekeeper: zero-shot labels only fire when DistilBERT's toxicity signal already exceeds 0.6. This prevents the zero-shot model from flagging politically charged but non-toxic language — words like "nationalist" or "religious" that carry toxicity signal only in genuinely hostile contexts.
+Thresholds are per-label and tuned on the validation set via F1 maximization. The 5 Jigsaw labels are decided by DistilBERT alone against those thresholds. The 7 zero-shot labels only fire when DistilBERT's toxicity signal already exceeds 0.6. This prevents the zero-shot model from flagging politically charged but non-toxic language — words like "nationalist" or "religious" that carry toxicity signal only in genuinely hostile contexts.
 
 ## Architecture
 
@@ -28,12 +28,14 @@ Performance on NLI benchmarks:
 - SNLI test accuracy: **91.65%**
 - MNLI mismatched accuracy: **87.55%**
 
-### Prediction pipeline (`src/model/distilbert_jigsaw/predict.py`)
+### Prediction pipeline (`app/main.py`)
 
-For each comment, both models run in parallel:
+For each comment, both models run:
 
-- The 5 Jigsaw labels use a weighted ensemble: **60% DistilBERT + 40% zero-shot**, with a combined threshold of 0.6.
+- The 5 Jigsaw labels use DistilBERT alone, compared against per-label thresholds from `thresholds.json` (F1-maximized on the validation set).
 - The 7 zero-shot-only labels use a two-gate system: DistilBERT's `IsToxic` or `IsHatespeech` score must exceed 0.6 (gatekeeper), and the zero-shot score must independently exceed 0.7. Both gates must pass for a label to fire. This makes the system conservative by design — ambiguous language that doesn't already read as toxic to DistilBERT will not be flagged.
+
+Inference calls the HuggingFace Inference API directly with `requests` (one POST for DistilBERT classification, one for zero-shot).
 
 ## Alternative Approach — TF-IDF + Logistic Regression & DistilBERT on YouToxic
 
@@ -131,10 +133,11 @@ The Jigsaw-trained labels (IsToxic, IsObscene, IsAbusive) perform strongest, whi
 
 | Endpoint | Description |
 |---|---|
+| `GET /health` | Health check — returns `{"status": "ok"}` |
 | `GET /comments/video?url={youtube_url}` | 10 comments from a specific video |
 | `GET /comments/comment?video_id={id}&comment_id={id}` | Single comment by ID |
 
-All endpoints return classified comments with `is_toxic` and `reasons`.
+All comment endpoints return `comment_id`, `video_id`, `text`, `author`, `likes`, `published_at`, `is_toxic`, `reasons`, and `score`.
 
 ## Setup
 
@@ -144,30 +147,49 @@ cp .env.example .env   # add YOUTUBE_API_KEY and HF_TOKEN
 uv run main.py
 ```
 
+Frontend dev server (separate terminal):
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Set `ENVIRONMENT=development` in `.env` to enable CORS for `http://localhost:5173`. Vite proxies `/comments` to `http://localhost:8000`, so the app runs at `http://localhost:5173` against the local API.
+
 ## Docker
 
 ```bash
 docker compose up --build
 ```
 
-The app will be available at `http://localhost:8000`. Models are cached in a Docker volume to avoid re-downloading on restarts. Make sure your `.env` file contains `YOUTUBE_API_KEY`.
+A multi-stage build compiles the React frontend and serves it from FastAPI at `http://localhost:8000` alongside the API. Make sure your `.env` file contains `YOUTUBE_API_KEY` and `HF_TOKEN`.
+
+## Render
+
+Deployed via `render.yaml` (Docker runtime, health check at `/health`). Set `YOUTUBE_API_KEY` and `HF_TOKEN` in the Render dashboard (both `sync: false`). Leave `ENVIRONMENT` unset in production — CORS stays off and the built frontend is served same-origin from `/`.
 
 ## Project Structure
 
 ```
-├── app/main.py                          # FastAPI backend
-├── front/                               # static frontend (HTML/CSS/JS)
+├── main.py                               # uvicorn entry point
+├── app/main.py                           # FastAPI backend
+├── frontend/                             # React + Vite frontend
+│   └── src/
+│       ├── lib/api.ts                    # API client
+│       └── components/                   # Sidebar, Screen, Card
 ├── src/
 │   ├── model/distilbert_jigsaw/
-│   │   ├── train.py                     # fine-tuning loop
-│   │   ├── evaluate.py                  # threshold optimization on val set
-│   │   ├── predict.py                   # inference pipeline
-│   │   └── test.py                      # validation against YouToxic
-│   ├── data/prepare_dataset.py          # Jigsaw dataset prep
-│   ├── scraping/                        # YouTube comment scraper
-│   └── reports/                         # evaluation and test results
-├── models/distilbert_jigsaw/            # saved weights + thresholds.json
-├── notebooks/                           # EDA
-├── Dockerfile
-└── docker-compose.yml
+│   │   ├── train.py                      # fine-tuning loop
+│   │   ├── evaluate.py                   # threshold optimization on val set
+│   │   ├── predict.py                    # offline inference pipeline
+│   │   └── test.py                       # validation against YouToxic
+│   ├── data/prepare_dataset.py           # Jigsaw dataset prep
+│   ├── scraping/                         # YouTube comment scraper
+│   └── reports/                          # evaluation and test results
+├── models/distilbert_jigsaw/             # saved weights + thresholds.json
+├── notebooks/                            # EDA
+├── Dockerfile                            # multi-stage: frontend build + API
+├── docker-compose.yml
+└── render.yaml                           # Render deployment
 ```
