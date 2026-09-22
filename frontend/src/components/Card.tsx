@@ -122,7 +122,8 @@ export function Card({ comment, isTop, depth, onDecide }: CardProps) {
                         left: 0,
                         right: 0,
                         display: "flex",
-                        justifyContent: "center",
+                        justifyContent: "flex-end",
+                        paddingRight: 20,
                     }}
                 >
                     <button
