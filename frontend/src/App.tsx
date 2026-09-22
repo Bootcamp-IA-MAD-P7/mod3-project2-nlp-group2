@@ -1,7 +1,6 @@
 import { startTransition, useCallback, useState } from "react"
 import type { CommentItem, Decision, DecisionLogItem } from "./types"
 import { EXTRA_SEED, INITIAL_QUEUE } from "./data/seed"
-import { extractCommentId, extractVideoId } from "./lib/youtube"
 import {
     fetchSingleComment,
     fetchVideoComments,
@@ -22,17 +21,12 @@ export default function App() {
     const [currentVideoId, setCurrentVideoId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
 
-    // Pasted a video link. Loads 10 comments from that video.
+    // Loads 10 comments for a video. The sidebar gives the bare video ID.
     const loadVideo = useCallback(
-        async (link: string) => {
+        async (videoId: string) => {
             setError(null)
             try {
-                const videoId = extractVideoId(link)
-                if (!videoId) {
-                    setError("Invalid YouTube URL")
-                    return
-                }
-                const comments = await fetchVideoComments(link)
+                const comments = await fetchVideoComments(videoId)
                 startTransition(() => {
                     setQueue(
                         comments.map((c, i) => toCommentItem(c, nextId + i)),
@@ -47,19 +41,11 @@ export default function App() {
         [nextId],
     )
 
-    // Pasted a comment id or link. Brings only that comment.
+    // Brings a single comment. The sidebar supplies both bare IDs.
     const loadComment = useCallback(
-        async (idOrLink: string) => {
+        async (videoId: string, commentId: string) => {
             setError(null)
             try {
-                const videoId = extractVideoId(idOrLink)
-                const commentId = extractCommentId(idOrLink)
-                if (!videoId || !commentId) {
-                    setError(
-                        "Please paste a full YouTube comment URL (must include v= and lc=)",
-                    )
-                    return
-                }
                 const comment = await fetchSingleComment(videoId, commentId)
                 startTransition(() => {
                     setQueue((prev) => [
@@ -100,8 +86,7 @@ export default function App() {
             return
         }
         try {
-            const link = `https://www.youtube.com/watch?v=${currentVideoId}`
-            const comments = await fetchVideoComments(link)
+            const comments = await fetchVideoComments(currentVideoId)
             startTransition(() => {
                 setQueue((prev) => [
                     ...prev,
