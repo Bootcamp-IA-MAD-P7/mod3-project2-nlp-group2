@@ -33,10 +33,6 @@ ZEROSHOT_LABEL_MAP = {
     "radicalism or extremism": "IsRadicalism",
 }
 
-SHARED_DISTILBERT_WEIGHT = 0.6
-SHARED_ZEROSHOT_WEIGHT = 0.4
-SHARED_THRESHOLD = 0.6
-
 GATEKEEPER_THRESHOLD = 0.6
 ZEROSHOT_ONLY_THRESHOLD = 0.7
 
@@ -121,14 +117,7 @@ def predict(text: str) -> tuple[dict[str, bool], float]:
     results = {}
 
     for label in DISTILBERT_LABELS:
-        zs_key = next((k for k, v in ZEROSHOT_LABEL_MAP.items() if v == label), None)
-        if zs_key:
-            combined = SHARED_DISTILBERT_WEIGHT * db_probs[
-                label
-            ] + SHARED_ZEROSHOT_WEIGHT * zs_scores.get(zs_key, 0)
-            results[label] = combined >= SHARED_THRESHOLD
-        else:
-            results[label] = db_probs[label] >= best_thresholds.get(label, 0.5)
+        results[label] = db_probs[label] >= best_thresholds.get(label, 0.5)
 
     toxic_signal = max(db_probs["IsToxic"], db_probs.get("IsHatespeech", 0))
 
