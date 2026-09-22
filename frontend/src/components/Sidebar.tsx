@@ -122,7 +122,6 @@ export function Sidebar({
                     onKeyDown={(e) => {
                         if (e.key === "Enter") submitVideo()
                     }}
-                    placeholder="Video ID, e.g. 04kJtp6pVXI"
                     style={{
                         width: "100%",
                         height: 38,
@@ -183,7 +182,6 @@ export function Sidebar({
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") submitComment()
                             }}
-                            placeholder="Comment ID"
                             style={{
                                 width: "100%",
                                 height: 36,
