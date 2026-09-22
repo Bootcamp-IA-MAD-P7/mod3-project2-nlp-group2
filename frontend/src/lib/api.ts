@@ -1,6 +1,6 @@
 import type { CommentItem } from "../types"
 
-export interface ApiComment {
+export interface CommentResponse {
     comment_id: string
     video_id: string
     text: string
@@ -12,30 +12,19 @@ export interface ApiComment {
     score: number
 }
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ""
-
-async function request<T>(path: string): Promise<T> {
-    const res = await fetch(`${API_BASE}${path}`)
-    if (!res.ok) {
-        throw new Error(`${res.status} ${res.statusText} — ${API_BASE}${path}`)
-    }
-    return res.json() as Promise<T>
+export async function fetchVideoComments(videoId: string): Promise<CommentResponse[]> {
+    const res = await fetch(`/comments/video?video_id=${encodeURIComponent(videoId)}`)
+    if (!res.ok) throw new Error(await res.text())
+    return res.json()
 }
 
-export async function fetchVideoComments(url: string): Promise<ApiComment[]> {
-    return request<ApiComment[]>(`/comments/video?url=${encodeURIComponent(url)}`)
+export async function fetchSingleComment(videoId: string, commentId: string): Promise<CommentResponse> {
+    const res = await fetch(`/comments/comment?video_id=${encodeURIComponent(videoId)}&comment_id=${encodeURIComponent(commentId)}`)
+    if (!res.ok) throw new Error(await res.text())
+    return res.json()
 }
 
-export async function fetchSingleComment(
-    videoId: string,
-    commentId: string,
-): Promise<ApiComment> {
-    return request<ApiComment>(
-        `/comments/comment?video_id=${encodeURIComponent(videoId)}&comment_id=${encodeURIComponent(commentId)}`,
-    )
-}
-
-export function toCommentItem(api: ApiComment, id: number): CommentItem {
+export function toCommentItem(api: CommentResponse, id: number): CommentItem {
     return {
         id,
         text: api.text,
