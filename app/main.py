@@ -4,7 +4,7 @@ import re
 import time
 from pathlib import Path
 
-import requests
+import torch
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +12,11 @@ from fastapi.staticfiles import StaticFiles
 from googleapiclient.discovery import build
 from huggingface_hub import hf_hub_download
 from pydantic import BaseModel
+from transformers import (
+    DistilBertTokenizerFast,
+    DistilBertForSequenceClassification,
+    pipeline,
+)
 
 load_dotenv()
 
@@ -43,7 +48,22 @@ thresholds_path = hf_hub_download(
 with open(thresholds_path) as f:
     best_thresholds = json.load(f)
 
-HF_HEADERS = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
+device = 0 if torch.cuda.is_available() else -1
+
+tokenizer = DistilBertTokenizerFast.from_pretrained(
+    "Anahia/distilbert-jigsaw-toxicity-multilabel"
+)
+distilbert_model = DistilBertForSequenceClassification.from_pretrained(
+    "Anahia/distilbert-jigsaw-toxicity-multilabel"
+)
+distilbert_model.eval()
+distilbert_model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+zero_shot = pipeline(
+    "zero-shot-classification",
+    model="cross-encoder/nli-deberta-v3-small",
+    device=device,
+)
 
 LABEL_DISPLAY = {
     "IsToxic": "toxic",
@@ -85,33 +105,28 @@ class CommentResponse(BaseModel):
 
 
 def get_distilbert_probs(text: str) -> dict[str, float]:
-    response = requests.post(
-        f"https://api-inference.huggingface.co/models/{DISTILBERT_MODEL}",
-        headers=HF_HEADERS,
-        json={"inputs": text},
+    encoding = tokenizer(
+        text, truncation=True, max_length=128,
+        padding="max_length", return_tensors="pt"
     )
-    out = response.json()
-    if isinstance(out, list) and isinstance(out[0], list):
-        out = out[0]
-    probs = {item["label"]: float(item["score"]) for item in out}
-    return {label: probs.get(label, 0.0) for label in DISTILBERT_LABELS}
+    input_ids = encoding["input_ids"].to(distilbert_model.device)
+    attention_mask = encoding["attention_mask"].to(distilbert_model.device)
+    with torch.no_grad():
+        logits = distilbert_model(
+            input_ids=input_ids, attention_mask=attention_mask
+        ).logits
+    probs = torch.sigmoid(logits).cpu().numpy()[0]
+    return {label: float(probs[i]) for i, label in enumerate(DISTILBERT_LABELS)}
 
 
 def predict(text: str) -> tuple[dict[str, bool], float]:
     db_probs = get_distilbert_probs(text)
 
-    response = requests.post(
-        f"https://api-inference.huggingface.co/models/{ZEROSHOT_MODEL}",
-        headers=HF_HEADERS,
-        json={
-            "inputs": text,
-            "parameters": {
-                "candidate_labels": list(ZEROSHOT_LABEL_MAP.keys()),
-                "multi_label": True,
-            },
-        },
+    zs_out = zero_shot(
+        text,
+        candidate_labels=list(ZEROSHOT_LABEL_MAP.keys()),
+        multi_label=True,
     )
-    zs_out = response.json()
     zs_scores = dict(zip(zs_out["labels"], zs_out["scores"]))
 
     results = {}
