@@ -1,75 +1,48 @@
-# React + TypeScript + Vite
+# YouTube Comment Moderator (frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web app for moderating YouTube comments. The moderator pastes a video link, the app loads comments already classified by a toxicity model, and shows them as swipeable cards: swipe left to not publish, swipe right to publish.
 
-Currently, two official plugins are available:
+## Tech stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 and TypeScript
+- Vite (dev server and build)
+- framer-motion (card drag and swipe animation)
+- ESLint (linting)
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Requires Node.js and npm (`package.json` does not pin a Node version).
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Vite prints the local address, normally `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Other scripts: `npm run build`, `npm run lint`, `npm run preview`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Backend connection
 
+The app does not classify anything itself. It calls a separate FastAPI backend, expected at `http://localhost:8000` (set in `src/lib/api.ts`), using two endpoints: `GET /comments/video` and `GET /comments/comment`. Without the backend running, no comments load; errors only show in the browser console.
+
+Swipe decisions are kept in memory only. The app does not send them to the backend yet.
+
+## Project structure
+
+```
+src/
+  main.tsx                    App entry point
+  App.tsx                     Holds the comment queue and handles each action
+  types.ts                    Shared types (comment, decision)
+  components/
+    Sidebar.tsx               Video link box, single-comment lookup, "Load more"
+    Screen.tsx                Main stage: background, hint text, left/right labels
+    ModerationDeck.tsx        Stacks the next 3 cards
+    Card.tsx                  One swipeable comment card (framer-motion)
+    Side.tsx                  The "Don't publish" / "Publish" arrow labels
+  lib/
+    api.ts                    Calls to the backend
+    youtube.ts                Gets video and comment ids from YouTube links
 ```
