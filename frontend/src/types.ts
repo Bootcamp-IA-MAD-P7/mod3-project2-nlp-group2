@@ -6,7 +6,7 @@ export interface CommentItem {
     text: string
     prediction: Prediction
     score: number // model confidence for the predicted label, 0 to 1
-    is_toxic?: boolean
+    is_toxic: boolean
     reasons: string[]
 }
 

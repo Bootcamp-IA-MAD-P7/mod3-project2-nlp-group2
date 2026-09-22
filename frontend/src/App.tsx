@@ -79,6 +79,7 @@ export default function App() {
                         text: item.text,
                         prediction: item.prediction,
                         score: item.score,
+                        is_toxic: item.is_toxic,
                         reasons: item.reasons,
                     })),
                 ])
