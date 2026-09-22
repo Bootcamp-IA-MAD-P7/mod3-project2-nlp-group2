@@ -1,0 +1,27 @@
+# environment
+.env
+.env.example
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# models & data — too large for the image
+models/
+data/
+
+# node
+frontend/node_modules/
+frontend/dist/
+
+# vcs / ide / os
+.git/
+.gitignore
+.github/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# notebooks
+notebooks/
+.ipynb_checkpoints/

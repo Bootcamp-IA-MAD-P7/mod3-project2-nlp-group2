@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: toxicity-classifier
+    runtime: docker
+    healthCheckPath: /health
+    envVars:
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: HF_TOKEN
+        sync: false

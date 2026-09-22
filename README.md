@@ -140,7 +140,7 @@ All endpoints return classified comments with `is_toxic` and `reasons`.
 
 ```bash
 uv sync
-cp .env.example .env   # add YOUTUBE_API_KEY
+cp .env.example .env   # add YOUTUBE_API_KEY and HF_TOKEN
 uv run main.py
 ```
 

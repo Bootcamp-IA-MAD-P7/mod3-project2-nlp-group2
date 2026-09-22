@@ -1,12 +1,7 @@
-import torch
 import json
-import numpy as np
-from huggingface_hub import hf_hub_download
-from transformers import (
-    DistilBertTokenizerFast,
-    DistilBertForSequenceClassification,
-    pipeline,
-)
+import os
+
+from huggingface_hub import InferenceClient, hf_hub_download
 
 MODEL_DIR = "Anahia/distilbert-jigsaw-toxicity-multilabel"
 ZEROSHOT_MODEL = "cross-encoder/nli-deberta-v3-small"
@@ -38,38 +33,23 @@ thresholds_path = hf_hub_download(
 with open(thresholds_path) as f:
     best_thresholds = json.load(f)
 
-tokenizer = DistilBertTokenizerFast.from_pretrained(MODEL_DIR)
-distilbert_model = DistilBertForSequenceClassification.from_pretrained(MODEL_DIR)
-distilbert_model.eval()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-distilbert_model.to(device)
-
-zero_shot = pipeline(
-    "zero-shot-classification",
-    model=ZEROSHOT_MODEL,
-    device=0 if torch.cuda.is_available() else -1,
-)
+client = InferenceClient(token=os.getenv("HF_TOKEN"))
 
 
 def get_distilbert_probs(text):
-    encoding = tokenizer(
-        text, truncation=True, max_length=128, padding="max_length", return_tensors="pt"
-    )
-    input_ids = encoding["input_ids"].to(device)
-    attention_mask = encoding["attention_mask"].to(device)
-    with torch.no_grad():
-        logits = distilbert_model(
-            input_ids=input_ids, attention_mask=attention_mask
-        ).logits
-    probs = torch.sigmoid(logits).cpu().numpy()[0]
-    return {label: float(probs[i]) for i, label in enumerate(DISTILBERT_LABELS)}
+    out = client.text_classification(text, model=MODEL_DIR)
+    probs = {item["label"]: float(item["score"]) for item in out}
+    return {label: probs.get(label, 0.0) for label in DISTILBERT_LABELS}
 
 
 def predict(text):
     db_probs = get_distilbert_probs(text)
 
-    zs_out = zero_shot(
-        text, candidate_labels=list(ZEROSHOT_LABEL_MAP.keys()), multi_label=True
+    zs_out = client.zero_shot_classification(
+        text,
+        labels=list(ZEROSHOT_LABEL_MAP.keys()),
+        multi_label=True,
+        model=ZEROSHOT_MODEL,
     )
     zs_scores = dict(zip(zs_out["labels"], zs_out["scores"]))
 
