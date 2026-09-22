@@ -84,6 +84,7 @@ class CommentResponse(BaseModel):
     published_at: str
     is_toxic: bool
     reasons: list[str]
+    score: float
 
 
 def get_distilbert_probs(text: str) -> dict[str, float]:
@@ -92,7 +93,7 @@ def get_distilbert_probs(text: str) -> dict[str, float]:
     return {label: probs.get(label, 0.0) for label in DISTILBERT_LABELS}
 
 
-def predict(text: str) -> dict[str, bool]:
+def predict(text: str) -> tuple[dict[str, bool], float]:
     db_probs = get_distilbert_probs(text)
 
     zs_out = client.zero_shot_classification(
@@ -125,7 +126,7 @@ def predict(text: str) -> dict[str, bool]:
         else:
             results[col] = zs_scores.get(zs_key, 0) >= ZEROSHOT_ONLY_THRESHOLD
 
-    return results
+    return results, toxic_signal
 
 
 def extract_video_id(url: str) -> str:
@@ -176,7 +177,7 @@ def fetch_comments(video_id: str, max_comments: int = 10) -> list[dict]:
 
 
 def classify_comment(comment: dict) -> CommentResponse:
-    predictions = predict(comment["text"])
+    predictions, score = predict(comment["text"])
     is_toxic = any(predictions.values())
     reasons = [
         LABEL_DISPLAY[label]
@@ -192,6 +193,7 @@ def classify_comment(comment: dict) -> CommentResponse:
         published_at=comment["published_at"],
         is_toxic=is_toxic,
         reasons=reasons,
+        score=score,
     )
 
 
